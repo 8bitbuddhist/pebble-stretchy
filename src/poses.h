@@ -1,5 +1,3 @@
-static unsigned char NUM_POSES = 9;
-
 typedef struct {
 	char shortname[10];
 	char fullname[25];
@@ -7,7 +5,7 @@ typedef struct {
 } Pose;
 
 Pose poses[] = {
-	{"tadasana", "Mountain Pose", "Place your feet hip-width apart, toes forward, and evenly balance on the four corners of your feet. Tuck stomach, straighten spine, and drop shoulders.\0"},
+	{"tadasana", "Mountain Pose", "Place your feet hip-width apart, toes forward, and evenly balance on the four corners of your feet. Tuck your stomach, straighten your spine, and drop your shoulders.\0"},
 	{"forbend", "Forward Bend", "Bend forward at the hips, keeping your shoulders down and your back straight. Place your hands by or on your feet.\0"},
 	{"downdog", "Downward Dog", "From your hands and knees, place hands in front of shoulders and knees below hips. Push up, creating a straight line from hands to shoulders.\0"},
 	// High plank
@@ -19,4 +17,6 @@ Pose poses[] = {
 	{"war2", "Warrior II", "Place your feet arm-distance apart and bend your front knee while keeping your back leg straight. Spread your arms horizontally. Look forward while keeping hips to side.\0"}
 };
 
-//Pose workout[] = {poses[0], poses[1], poses[2], poses[3], poses[4], poses[2],}
+static unsigned char NUM_POSES = sizeof(poses) / sizeof(Pose);
+
+//Pose workout_yoga[] = {poses[0], poses[1], poses[2], poses[3], poses[4], poses[2], poses[5], poses[6], poses[7], poses[8]};

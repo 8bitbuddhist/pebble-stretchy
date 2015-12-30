@@ -3,7 +3,6 @@
 
 static Window *window;
 static TextLayer *header_layer;
-static TextLayer *title_layer;
 static TextLayer *description_layer;
 static TextLayer *footer_layer;
 
@@ -17,24 +16,16 @@ bool title_page = 1;
 static int last_change = 0;
 static int interval = 60;
 static char seconds_buffer[20];
-
-static void refresh_layers() {
-	if (!layer_get_hidden((Layer*)title_layer)) {
-		layer_set_hidden((Layer*)title_layer, true);
-	}
-	
-	if (layer_get_hidden((Layer*)header_layer)) {
-		layer_set_hidden((Layer*)header_layer, false);
-	}
-	if (layer_get_hidden((Layer*)description_layer)) {
-		layer_set_hidden((Layer*)description_layer, false);
-	}
-	
-	text_layer_set_text(header_layer, poses[current_pose].fullname);
-	text_layer_set_text(description_layer, poses[current_pose].description);
-}
+static char pose_name_buffer[50];
 
 static void change_pose(bool increment) {
+	if (title_page) {
+		// Remove title screen formatting
+		title_page = 0;
+		layer_set_hidden((Layer*)header_layer, false);
+		layer_set_hidden((Layer*)description_layer, false);
+		text_layer_set_font(description_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+	}
 	if (increment) {
 		// Change to the next pose.
 		current_pose++;
@@ -44,8 +35,9 @@ static void change_pose(bool increment) {
 		}
 	}
 	else {
-		 // Change to the previous pose.
-		if (current_pose == 0) {
+		// Change to the previous pose.
+		// TODO: Fix default value of current_pose
+		if (current_pose == 0 || current_pose == 255) {
 			current_pose = NUM_POSES - 1;
 		}
 		else {
@@ -55,28 +47,26 @@ static void change_pose(bool increment) {
 	
 	last_change = 0;
 	
-	refresh_layers();
+	snprintf(pose_name_buffer, sizeof(pose_name_buffer), "%d: %s", current_pose + 1, poses[current_pose].fullname);
+	
+	// Refresh the layers
+	text_layer_set_text(header_layer, pose_name_buffer);
+	text_layer_set_text(description_layer, poses[current_pose].description);
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
   // Start/stop the poses
-	if (title_page) {
-		title_page = 0;
-		change_pose(true);
-	}
 	start = !start;
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
-	if (!title_page) {
-		change_pose(true);
-	}
+	// Move ahead one pose
+	change_pose(false);
 }
 
 static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
-	if (!title_page) {
-		change_pose(false);
-	}
+	// Move back one pose
+	change_pose(true);
 }
 
 static void click_config_provider(void *context) {
@@ -90,12 +80,6 @@ static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
 
-	// Title layer displays text in the very center of screen
-	title_layer = text_layer_create((GRect) { .origin = { 0, 70 }, .size = { bounds.size.w, 22 } });
-	text_layer_set_text(title_layer, "Press select to start.");
-	text_layer_set_text_alignment(title_layer, GTextAlignmentCenter);
-	text_layer_set_font(title_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
-	
 	// Header layer displays text in the top center of the screen
 	header_layer = text_layer_create((GRect) { .origin = { 0, 0 }, .size = { bounds.size.w, 20 } });
 	text_layer_set_text_alignment(header_layer, GTextAlignmentCenter);
@@ -107,6 +91,9 @@ static void window_load(Window *window) {
 	description_layer = text_layer_create((GRect) { .origin = { 0, 20 }, .size = { bounds.size.w, bounds.size.h - 20 } });
 	text_layer_set_text_alignment(description_layer, GTextAlignmentCenter);
 	text_layer_set_overflow_mode(description_layer, GTextOverflowModeWordWrap);
+	// By default, show title information
+	text_layer_set_text(description_layer, "Press select to start the timer, or press either the forward or back buttons to select a pose.");
+	text_layer_set_font(description_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
 	
 	// Footer layer displays information about the active mode
 	footer_layer = text_layer_create((GRect) { .origin = { 0, bounds.size.h - 20 }, .size = { bounds.size.w, 20 } });
@@ -116,7 +103,6 @@ static void window_load(Window *window) {
 	
 	layer_add_child(window_layer, text_layer_get_layer(header_layer));
 	layer_add_child(window_layer, text_layer_get_layer(description_layer));
-	layer_add_child(window_layer, text_layer_get_layer(title_layer));
 	layer_add_child(window_layer, text_layer_get_layer(footer_layer));
 }
 
@@ -142,7 +128,6 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 static void window_unload(Window *window) {
   text_layer_destroy(header_layer);
 	text_layer_destroy(description_layer);
-	text_layer_destroy(title_layer);
 	text_layer_destroy(footer_layer);
 }
 
