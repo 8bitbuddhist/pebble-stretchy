@@ -1,0 +1,23 @@
+{
+    "appKeys": {},
+    "capabilities": [
+        ""
+    ],
+    "companyName": "Uninspired Software",
+    "longName": "Stretchy",
+    "projectType": "native",
+    "resources": {
+        "media": []
+    },
+    "sdkVersion": "3",
+    "shortName": "Stretchy",
+    "targetPlatforms": [
+        "aplite",
+        "basalt"
+    ],
+    "uuid": "10f4b650-8174-41a7-bde1-0fc038655d66",
+    "versionLabel": "0.1",
+    "watchapp": {
+        "watchface": false
+    }
+}
